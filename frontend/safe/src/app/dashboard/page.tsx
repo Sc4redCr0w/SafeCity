@@ -320,13 +320,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+const FilteredHeatmap = dynamic(
+  () => import("@/components/dashboard/FilteredHeatmap"),
+  { ssr: false }
+);
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8000/dashboard/summary")
+    fetch("http://127.0.0.1:8001/dashboard/summary")
       .then((res) => {
         if (!res.ok) throw new Error("Backend not reachable");
         return res.json();
@@ -407,8 +413,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* INTERACTIVE HEATMAP WITH FILTERS */}
+      <FilteredHeatmap />
+
       {/* HIGH RISK LOCALITIES */}
-      <div className="rounded-xl bg-slate-900 p-4 border border-slate-800">
+      <div className="rounded-xl bg-slate-900 p-4 border border-slate-800 mt-8">
         <h2 className="font-medium mb-3">High Risk Localities</h2>
         <div className="space-y-2 text-sm">
           {data.heatmap_points

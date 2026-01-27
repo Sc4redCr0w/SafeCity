@@ -250,7 +250,8 @@ app.add_middleware(
 # -----------------------------
 # LOAD ML MODEL
 # -----------------------------
-with open("backend/model/crime_risk_model.pkl", "rb") as f:
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "crime_risk_model.pkl")
+with open(MODEL_PATH, "rb") as f:
     model = pickle.load(f)
 
 # -----------------------------
@@ -470,6 +471,81 @@ def get_contextual_news(data: NewsRequest):
     }
 
 
+@app.get("/heatmap/filtered")
+def get_filtered_heatmap(
+    duration: str = "7days",  # 7days, 30days, alltime
+    crime_type: str = "all",  # all, 1, 2, 3, ... 
+    start_hour: int = 0,
+    end_hour: int = 23
+):
+    """
+    Return filtered heatmap points based on user selections
+    duration: 7days | 30days | alltime
+    crime_type: all | 1,2,3,... (comma-separated or single)
+    start_hour: 0-23
+    end_hour: 0-23
+    """
+    
+    # Simulate crime data filtering
+    heatmap_points = []
+    
+    # Generate points for each locality
+    for loc in MUMBAI_LOCALITIES:
+        # Simulate incident count based on duration
+        if duration == "7days":
+            incident_count = random.randint(5, 25)
+        elif duration == "30days":
+            incident_count = random.randint(20, 100)
+        else:  # alltime
+            incident_count = random.randint(100, 500)
+        
+        # Adjust count based on crime type filter
+        if crime_type != "all":
+            incident_count = int(incident_count * random.uniform(0.5, 1.0))
+        
+        # Calculate intensity (0-1) for heatmap
+        intensity = incident_count / 500 if duration != "alltime" else incident_count / 2000
+        intensity = min(intensity, 1.0)
+        
+        # Determine risk level
+        if intensity >= 0.6:
+            risk_level = "High"
+        elif intensity >= 0.3:
+            risk_level = "Medium"
+        else:
+            risk_level = "Low"
+        
+        heatmap_points.append({
+            "name": loc["name"],
+            "lat": loc["lat"],
+            "lng": loc["lng"],
+            "incidents": incident_count,
+            "intensity": round(intensity, 2),
+            "risk_level": risk_level,
+            "avg_confidence": round(random.uniform(0.5, 0.9), 2)
+        })
+    
+    return {
+        "duration": duration,
+        "crime_type": crime_type,
+        "time_range": {"start": start_hour, "end": end_hour},
+        "heatmap_points": heatmap_points,
+        "crime_types": [
+            {"id": "all", "name": "All Crime Types"},
+            {"id": "1", "name": "Assault"},
+            {"id": "2", "name": "Robbery"},
+            {"id": "3", "name": "Burglary"},
+            {"id": "4", "name": "Theft"},
+            {"id": "5", "name": "Vehicle Theft"},
+            {"id": "6", "name": "Cyber Crime"},
+            {"id": "7", "name": "Fraud"},
+            {"id": "8", "name": "Property Crime"},
+            {"id": "9", "name": "Drug-related"},
+            {"id": "10", "name": "Public Nuisance"}
+        ]
+    }
+
+
 @app.get("/dashboard/summary")
 def dashboard_summary():
     # Simulated aggregates derived from ML dataset idea
@@ -515,3 +591,8 @@ def dashboard_summary():
         "trend": trend,
         "heatmap_points": heatmap_points
     }
+
+# Run the server
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8001)
