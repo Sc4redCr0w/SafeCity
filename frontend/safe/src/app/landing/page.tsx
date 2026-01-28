@@ -23,25 +23,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="w-8 h-8 text-blue-400" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">SafeCity</span>
-          </div>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#capabilities" className="hover:text-blue-400 transition">How It Works</a>
-            <a href="#for-police" className="hover:text-blue-400 transition">For Police</a>
-            <a href="#compliance" className="hover:text-blue-400 transition">Compliance</a>
-            <a href="#resources" className="hover:text-blue-400 transition">Resources</a>
-            <button className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-medium transition">
-              Schedule Demo
-            </button>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center pt-20 px-6 overflow-hidden">
         {/* Animated background elements */}
@@ -75,28 +56,12 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg font-medium text-lg transition transform hover:scale-105">
-              Schedule Demo →
-            </button>
-            <button className="px-8 py-4 border border-blue-400/50 hover:bg-blue-400/10 rounded-lg font-medium text-lg transition">
-              View Case Studies
-            </button>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 mt-16">
-            <div className="border border-slate-800 rounded-lg p-6 bg-slate-900/50 backdrop-blur">
-              <p className="text-3xl font-bold text-blue-400 mb-2">94%</p>
-              <p className="text-slate-300 text-sm">Prediction Accuracy</p>
-            </div>
-            <div className="border border-slate-800 rounded-lg p-6 bg-slate-900/50 backdrop-blur">
-              <p className="text-3xl font-bold text-yellow-400 mb-2">45min</p>
-              <p className="text-slate-300 text-sm">Avg Response Time</p>
-            </div>
-            <div className="border border-slate-800 rounded-lg p-6 bg-slate-900/50 backdrop-blur">
-              <p className="text-3xl font-bold text-red-400 mb-2">280+</p>
-              <p className="text-slate-300 text-sm">Cities Covered</p>
-            </div>
+            <Link href="/crime-prediction" className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg font-medium text-lg transition transform hover:scale-105 text-center">
+              Try Prediction →
+            </Link>
+            <Link href="/crime-analytics" className="px-8 py-4 border border-blue-400/50 hover:bg-blue-400/10 rounded-lg font-medium text-lg transition text-center">
+              View Analytics
+            </Link>
           </div>
         </div>
       </section>

@@ -3,40 +3,9 @@ import { BarChart3, Map, Shield, TrendingUp, AlertTriangle, FileText, ArrowRight
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Shield className="w-8 h-8 text-blue-400" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">SafeCity</span>
-          </Link>
-          
-          <div className="flex items-center gap-6">
-            <Link href="/crime-analytics" className="text-sm font-medium hover:text-blue-400 transition-colors">
-              Analytics
-            </Link>
-            <Link href="/crime-prediction" className="text-sm font-medium hover:text-blue-400 transition-colors">
-              Prediction
-            </Link>
-            <Link href="/fir" className="text-sm font-medium hover:text-blue-400 transition-colors">
-              FIR
-            </Link>
-            <Link href="/dashboard" className="text-sm font-medium hover:text-blue-400 transition-colors">
-              Dashboard
-            </Link>
-            <Link 
-              href="/landing"
-              className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg font-medium transition"
-            >
-              Explore
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white pt-24">
       {/* Hero Section */}
-      <section className="pt-40 px-6 pb-20">
+      <section className="px-6 pb-20">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
             Crime Analytics & Prediction Platform

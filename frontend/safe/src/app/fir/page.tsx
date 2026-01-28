@@ -140,9 +140,9 @@ export default function FIRPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white pt-24">
       {/* Header */}
-      <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
+      <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
             FIR Management
