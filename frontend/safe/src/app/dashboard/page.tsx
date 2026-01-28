@@ -39,7 +39,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#020617] to-[#020617] text-white p-8 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] to-[#020617] text-white p-8 space-y-8 pt-24">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-semibold">SafeCity Dashboard</h1>
