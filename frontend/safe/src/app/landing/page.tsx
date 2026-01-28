@@ -31,13 +31,13 @@ export default function LandingPage() {
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">SafeCity</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            <Link href="/dashboard" className="hover:text-blue-400 transition font-medium">Dashboard</Link>
-            <Link href="/predict" className="hover:text-blue-400 transition font-medium">Citywise</Link>
-            <Link href="/predict-accident" className="hover:text-blue-400 transition font-medium">Accidents</Link>
-            <Link href="/fir" className="hover:text-blue-400 transition font-medium">FIR</Link>
-            <Link href="/crime-prediction" className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-medium transition inline-block">
-              Crime Prediction
-            </Link>
+            <a href="#capabilities" className="hover:text-blue-400 transition">How It Works</a>
+            <a href="#for-police" className="hover:text-blue-400 transition">For Police</a>
+            <a href="#compliance" className="hover:text-blue-400 transition">Compliance</a>
+            <a href="#resources" className="hover:text-blue-400 transition">Resources</a>
+            <button className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-medium transition">
+              Schedule Demo
+            </button>
           </div>
         </div>
       </nav>
@@ -75,12 +75,12 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link href="/crime-prediction" className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg font-medium text-lg transition transform hover:scale-105 inline-block text-center">
-              Crime Prediction →
-            </Link>
-            <Link href="/crime-analytics" className="px-8 py-4 border border-blue-400/50 hover:bg-blue-400/10 rounded-lg font-medium text-lg transition inline-block text-center">
-              Crime Analytics
-            </Link>
+            <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg font-medium text-lg transition transform hover:scale-105">
+              Schedule Demo →
+            </button>
+            <button className="px-8 py-4 border border-blue-400/50 hover:bg-blue-400/10 rounded-lg font-medium text-lg transition">
+              View Case Studies
+            </button>
           </div>
 
           {/* Stats */}
