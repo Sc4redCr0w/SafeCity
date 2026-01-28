@@ -1195,6 +1195,31 @@ def predict_crime_by_city(city: str):
     except Exception as e:
         return {"error": str(e), "city": city, "found": False}
 
+
+@app.get("/api/crime/predict-crime-types")
+def predict_crime_types(city: str):
+    """Get predicted probabilities for each crime type in a specific city"""
+    try:
+        from model.crime_type_predictor import predict_crime_type_probabilities
+        
+        predictions = predict_crime_type_probabilities(city)
+        
+        if predictions is None:
+            return {
+                "city": city,
+                "found": False,
+                "crime_type_predictions": {}
+            }
+        
+        return {
+            "city": city,
+            "found": True,
+            "crime_type_predictions": predictions
+        }
+    except Exception as e:
+        return {"error": str(e), "city": city, "found": False}
+
+
 # Run the server
 if __name__ == "__main__":
     import uvicorn

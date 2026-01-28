@@ -3,7 +3,8 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { MapPin, AlertTriangle, TrendingUp, Loader, BarChart3 } from "lucide-react";
-import { predictCrimeByCity } from "@/services/crimeLocationService";
+import { predictCrimeByCity, predictCrimeTypes } from "@/services/crimeLocationService";
+import type { CrimeTypePrediction } from "@/services/crimeLocationService";
 
 const CrimePredictionMap = dynamic(() => import("@/components/CrimePredictionMap").then(mod => ({ default: mod.CrimePredictionMap })), {
   ssr: false,
@@ -15,6 +16,7 @@ export default function CrimePredictionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [predictionData, setPredictionData] = useState<any>(null);
+  const [crimeTypePredictions, setCrimeTypePredictions] = useState<CrimeTypePrediction | null>(null);
 
   const getRiskLevel = (percentage: number) => {
     if (percentage >= 75) return { level: "CRITICAL", color: "text-red-500", bgColor: "bg-red-900/20" };
@@ -29,11 +31,16 @@ export default function CrimePredictionPage() {
     setLoading(true);
     setError(null);
     setPredictionData(null);
+    setCrimeTypePredictions(null);
 
     try {
       const data = await predictCrimeByCity(selectedCity);
       if (data.found) {
         setPredictionData(data);
+        
+        // Also fetch crime type predictions
+        const crimeTypeData = await predictCrimeTypes(selectedCity);
+        setCrimeTypePredictions(crimeTypeData);
       } else {
         setError(`No data found for "${selectedCity}". Try another city.`);
       }
@@ -58,10 +65,15 @@ export default function CrimePredictionPage() {
         setLoading(true);
         setError(null);
         setPredictionData(null);
+        setCrimeTypePredictions(null);
         try {
           const data = await predictCrimeByCity(city);
           if (data.found) {
             setPredictionData(data);
+            
+            // Also fetch crime type predictions
+            const crimeTypeData = await predictCrimeTypes(city);
+            setCrimeTypePredictions(crimeTypeData);
           } else {
             setError(`No data found for "${city}".`);
           }
@@ -76,9 +88,24 @@ export default function CrimePredictionPage() {
   };
 
   const riskInfo = predictionData ? getRiskLevel(predictionData.risk_percentage) : null;
-  const sortedCrimes = predictionData
+  
+  // Get sorted predicted crime types (if available), otherwise fallback to historical breakdown
+  const sortedCrimes = crimeTypePredictions && crimeTypePredictions.found
+    ? Object.entries(crimeTypePredictions.crime_type_predictions)
+        .map(([crime, probability]) => ({
+          name: crime,
+          percentage: probability,
+          isHistorical: false
+        }))
+        .sort((a, b) => b.percentage - a.percentage)
+    : predictionData
     ? Object.entries(predictionData.crime_breakdown)
-        .sort(([, a], [, b]) => b.count - a.count)
+        .sort(([, a], [, b]) => b.percentage - a.percentage)
+        .map(([crime, data]) => ({
+          name: crime,
+          percentage: data.percentage,
+          isHistorical: true
+        }))
     : [];
 
   return (
@@ -218,26 +245,33 @@ export default function CrimePredictionPage() {
                 </div>
               </div>
 
-              {/* Crime Breakdown */}
+              {/* Crime Breakdown / Predictions */}
               <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-6 rounded-xl backdrop-blur-sm">
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-purple-400" />
-                  Crime Type Breakdown
+                  {crimeTypePredictions && crimeTypePredictions.found ? "Predicted Crime Probability" : "Historical Crime Breakdown"}
                 </h3>
+                {crimeTypePredictions && crimeTypePredictions.found && (
+                  <p className="text-xs text-blue-300 mb-4">📊 Based on predictive ML model analysis</p>
+                )}
 
                 <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {sortedCrimes.map(([crimeType, data], index) => (
-                    <div key={crimeType} className="bg-slate-800/50 p-4 rounded-lg border border-slate-600/30">
+                  {sortedCrimes.map((crime, index) => (
+                    <div key={crime.name} className="bg-slate-800/50 p-4 rounded-lg border border-slate-600/30">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center justify-center w-8 h-8 bg-purple-900/50 rounded-full text-xs font-bold text-purple-400">
                             {index + 1}
                           </div>
-                          <span className="font-semibold text-white">{crimeType}</span>
+                          <div>
+                            <span className="font-semibold text-white">{crime.name}</span>
+                            {crime.isHistorical && (
+                              <span className="ml-2 text-xs text-gray-500">(historical)</span>
+                            )}
+                          </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-blue-400">{data.count}</p>
-                          <p className="text-xs text-gray-400">{data.percentage}%</p>
+                          <p className="text-lg font-bold text-blue-400">{crime.percentage}%</p>
                         </div>
                       </div>
 
@@ -245,7 +279,7 @@ export default function CrimePredictionPage() {
                       <div className="w-full bg-slate-700/50 rounded-full h-2 overflow-hidden">
                         <div
                           className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full"
-                          style={{ width: `${data.percentage}%` }}
+                          style={{ width: `${crime.percentage}%` }}
                         />
                       </div>
                     </div>
