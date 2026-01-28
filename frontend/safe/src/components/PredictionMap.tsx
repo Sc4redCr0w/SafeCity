@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, useMapEvents } from "react-leaflet";
 import { useState } from "react";
 import "leaflet/dist/leaflet.css";
 import "@/lib/leafletFix";
@@ -75,75 +75,16 @@ function InteractivePredictionMarker({ onPredictionResult }: Props) {
   });
 
   return position ? (
-    <Marker position={position}>
-      <Popup>
-        <div style={{ width: "280px" }}>
-          <h3 style={{ margin: "0 0 8px 0" }}>Accident Risk Prediction</h3>
-          
-          <div style={{ marginBottom: "12px" }}>
-            <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: "bold" }}>
-              Hour (0-23):
-            </label>
-            <input 
-              type="number" 
-              min="0" 
-              max="23" 
-              value={selectedHour}
-              onChange={(e) => setSelectedHour(Number(e.target.value))}
-              style={{ width: "100%", padding: "4px", borderRadius: "4px", border: "1px solid #ddd" }}
-            />
-          </div>
-
-          <button
-            onClick={() => position && predictAtLocation(position[0], position[1])}
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "8px",
-              backgroundColor: loading ? "#ccc" : "#2563eb",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: loading ? "not-allowed" : "pointer",
-              marginBottom: "8px"
-            }}
-          >
-            {loading ? "Predicting..." : "Predict"}
-          </button>
-
-          {error && (
-            <div style={{ color: "red", fontSize: "12px", marginBottom: "8px" }}>
-              {error}
-            </div>
-          )}
-
-          {result && (
-            <div style={{ fontSize: "12px", backgroundColor: "#f0f9ff", padding: "8px", borderRadius: "4px" }}>
-              <div style={{ marginBottom: "4px" }}>
-                <strong>Risk Probability:</strong> {(result.risk_probability * 100).toFixed(1)}%
-              </div>
-              <div style={{ marginBottom: "4px" }}>
-                <strong>Risk Level:</strong> <span style={{ color: result.risk_level === "High" ? "red" : result.risk_level === "Medium" ? "orange" : "green" }}>
-                  {result.risk_level}
-                </span>
-              </div>
-              <div style={{ marginBottom: "4px" }}>
-                <strong>Priority:</strong> {result.priority}
-              </div>
-              <div style={{ marginBottom: "4px" }}>
-                <strong>Urgency Score:</strong> {result.urgency_score}
-              </div>
-            </div>
-          )}
-
-          <div style={{ fontSize: "11px", color: "#666", marginTop: "8px" }}>
-            <p style={{ margin: "0" }}>
-              📍 {position[0].toFixed(4)}, {position[1].toFixed(4)}
-            </p>
-          </div>
-        </div>
-      </Popup>
-    </Marker>
+    <CircleMarker
+      center={position}
+      radius={12}
+      pathOptions={{
+        color: '#3b82f6',
+        fillColor: '#60a5fa',
+        fillOpacity: 0.8,
+        weight: 3,
+      }}
+    />
   ) : null;
 }
 

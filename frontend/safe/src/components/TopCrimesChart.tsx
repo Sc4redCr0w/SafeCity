@@ -43,7 +43,7 @@ export function TopCrimesChart() {
             </div>
             <div className="w-full bg-slate-700/50 rounded-full h-2 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-red-500 to-orange-500 h-2 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-orange-500 to-red-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(count / maxCrime) * 100}%` }}
               />
             </div>
