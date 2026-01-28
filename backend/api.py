@@ -1127,6 +1127,74 @@ def get_top_crimes(limit: int = 10):
     except Exception as e:
         return {"error": str(e), "top_crimes": {}}
 
+
+@app.get("/api/crime/predict-by-city")
+def predict_crime_by_city(city: str):
+    """Get crime risk prediction and crime breakdown for a specific city"""
+    import pandas as pd
+    import numpy as np
+    
+    csv_path = os.path.join(os.path.dirname(__file__), "model", "indian_crimes_csv", "crime_dataset_india.csv")
+    
+    try:
+        df = pd.read_csv(csv_path)
+        
+        # Filter by city
+        if city and 'City' in df.columns:
+            city_data = df[df['City'].str.contains(city, case=False, na=False)]
+        else:
+            city_data = df
+        
+        if len(city_data) == 0:
+            return {
+                "city": city,
+                "found": False,
+                "risk_percentage": 0,
+                "crime_breakdown": {},
+                "total_incidents": 0
+            }
+        
+        # Get crime breakdown by description
+        crime_breakdown = {}
+        if 'Crime Description' in city_data.columns:
+            crime_counts = city_data['Crime Description'].value_counts().to_dict()
+            total = sum(crime_counts.values())
+            crime_breakdown = {
+                str(k): {
+                    "count": int(v),
+                    "percentage": round((v / total) * 100, 2)
+                }
+                for k, v in crime_counts.items()
+            }
+        
+        # Calculate risk percentage based on crime density
+        total_crimes = len(city_data)
+        
+        # Get all cities to find the max crime count for normalization
+        if 'City' in df.columns:
+            all_city_counts = df['City'].value_counts()
+            max_crimes_in_any_city = all_city_counts.max()
+            # Normalize risk to 0-100 based on relative crime count compared to the highest
+            risk_percentage = round((total_crimes / max_crimes_in_any_city) * 100, 2) if max_crimes_in_any_city > 0 else 0
+        else:
+            # Fallback if City column doesn't exist
+            risk_percentage = min(round((total_crimes / 100) * 100, 2), 100)
+        
+        # Get additional stats
+        unique_crime_types = city_data['Crime Description'].nunique() if 'Crime Description' in city_data.columns else 0
+        
+        return {
+            "city": city,
+            "found": True,
+            "risk_percentage": risk_percentage,
+            "crime_breakdown": crime_breakdown,
+            "total_incidents": total_crimes,
+            "unique_crime_types": unique_crime_types,
+            "avg_crimes_per_type": round(total_crimes / max(unique_crime_types, 1), 2)
+        }
+    except Exception as e:
+        return {"error": str(e), "city": city, "found": False}
+
 # Run the server
 if __name__ == "__main__":
     import uvicorn

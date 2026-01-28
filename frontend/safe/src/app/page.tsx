@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Map, Wand2, TrendingUp, Shield } from "lucide-react";
+import { BarChart3, Map, Wand2, TrendingUp, Shield, AlertTriangle } from "lucide-react";
 
 export default function Home() {
   return (
@@ -14,6 +14,7 @@ export default function Home() {
           <div className="flex gap-6">
             <Link href="/dashboard" className="hover:text-blue-400 transition-colors text-sm font-medium">Dashboard</Link>
             <Link href="/crime-analytics" className="hover:text-blue-400 transition-colors text-sm font-medium">Analytics</Link>
+            <Link href="/crime-prediction" className="hover:text-blue-400 transition-colors text-sm font-medium">Prediction</Link>
             <Link href="/predict" className="hover:text-blue-400 transition-colors text-sm font-medium">Predict</Link>
           </div>
         </div>
@@ -67,19 +68,19 @@ export default function Home() {
           </Link>
 
           {/* Prediction Card */}
-          <Link href="/predict">
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-8 rounded-xl hover:border-purple-400/50 transition-all hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer group backdrop-blur-sm">
+          <Link href="/crime-prediction">
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-8 rounded-xl hover:border-orange-400/50 transition-all hover:shadow-lg hover:shadow-orange-500/20 cursor-pointer group backdrop-blur-sm">
               <div className="flex justify-center mb-4">
-                <Wand2 className="w-10 h-10 text-purple-400 group-hover:scale-110 transition-transform" />
+                <AlertTriangle className="w-10 h-10 text-orange-400 group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="text-xl font-bold mb-3 group-hover:text-purple-400 transition-colors">
-                Crime Risk Predictor
+              <h3 className="text-xl font-bold mb-3 group-hover:text-orange-400 transition-colors">
+                Location Risk Predictor
               </h3>
               <p className="text-gray-300 text-sm">
-                Get AI-powered predictions for crime risk based on location, time, and historical patterns.
+                Select a location on the map and get detailed crime risk predictions with breakdown by crime type.
               </p>
-              <div className="mt-6 inline-block px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-semibold group-hover:bg-purple-500/40 transition-colors">
-                Predict →
+              <div className="mt-6 inline-block px-4 py-2 bg-orange-500/20 text-orange-400 rounded-lg text-sm font-semibold group-hover:bg-orange-500/40 transition-colors">
+                Analyze →
               </div>
             </div>
           </Link>
