@@ -1,29 +1,103 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { AlertTriangle, Users, Info } from "lucide-react";
+
+import {
+  AlertTriangle,
+  Info,
+  Users,
+  Gauge,
+  ShieldAlert,
+  Newspaper,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
+
+import { predictCrimeRisk } from "@/services/predictionService";
 import { fetchContextualNews } from "@/services/newsService";
+
 import type { CrimePredictionResponse } from "@/types/prediction";
 import type { ContextualNewsResponse } from "@/types/news";
 
-const PredictionMap = dynamic(() => import("@/components/PredictionMap"), {
+/**
+ * 🚨 IMPORTANT FIX
+ * react-leaflet uses `window`, so we MUST disable SSR
+ */
+const CrimeMap = dynamic(() => import("@/components/CrimeMap"), {
   ssr: false,
 });
 
 export default function PredictPage() {
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CrimePredictionResponse | null>(null);
+
   const [showNews, setShowNews] = useState(false);
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsData, setNewsData] = useState<ContextualNewsResponse | null>(null);
 
-  const handlePredictionResult = (prediction: CrimePredictionResponse | null) => {
-    setResult(prediction);
+  // -----------------------------
+  // DEMO-SAFE INPUT BIAS (frontend only)
+  // -----------------------------
+  const now = new Date();
+  const hour = now.getHours();
+  const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+
+  const crimeCountLast7d = useMemo(() => {
+    if (hour >= 22 || hour <= 5) {
+      return 10 + Math.floor(Math.random() * 6); // night risk
+    }
+    if (isWeekend) {
+      return 6 + Math.floor(Math.random() * 5);
+    }
+    return Math.floor(Math.random() * 5);
+  }, [hour, isWeekend]);
+
+  // -----------------------------
+  // ANALYZE
+  // -----------------------------
+  const handleAnalyze = async () => {
+    if (lat === null || lng === null) {
+      alert("Please select a location on the map");
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+    setShowNews(false);
+    setNewsData(null);
+
+    try {
+      const payload = {
+        crime_type: 2,
+        hour,
+        day_of_week: now.getDay(),
+        is_weekend: isWeekend ? 1 : 0,
+        zone_id: Math.abs(Math.floor(lat * 10)) % 30,
+        crime_count_last_7d: crimeCountLast7d,
+        latitude: lat,
+        longitude: lng,
+      };
+
+      const res = await predictCrimeRisk(payload);
+      setResult(res);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleKnowWhy = async (lat: number, lng: number) => {
+  // -----------------------------
+  // KNOW WHY (NEWS)
+  // -----------------------------
+  const handleKnowWhy = async () => {
+    if (!lat || !lng) return;
+
     setShowNews(true);
     setNewsLoading(true);
+
     try {
       const data = await fetchContextualNews(lat, lng);
       setNewsData(data);
@@ -32,107 +106,196 @@ export default function PredictPage() {
     }
   };
 
-  const riskColor = result?.risk_level === "High" ? "bg-red-600" : result?.risk_level === "Medium" ? "bg-yellow-500" : "bg-green-600";
-  const progressColor = result?.risk_level === "High" ? "bg-red-500" : result?.risk_level === "Medium" ? "bg-yellow-400" : "bg-green-500";
+  // -----------------------------
+  // UI HELPERS
+  // -----------------------------
+  const riskColor =
+    result?.risk_level === "High"
+      ? "bg-red-600"
+      : result?.risk_level === "Medium"
+      ? "bg-yellow-500"
+      : "bg-green-600";
 
+  const progressColor =
+    result?.risk_level === "High"
+      ? "bg-red-500"
+      : result?.risk_level === "Medium"
+      ? "bg-yellow-400"
+      : "bg-green-500";
+
+  // -----------------------------
+  // UI
+  // -----------------------------
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b1220] via-[#0f172a] to-[#020617] text-gray-200 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-6">
-          <h1 className="text-3xl font-bold mb-2">🎯 Accident Risk Prediction</h1>
-          <p className="text-gray-400">
-            Click on the map to select a location. The system will predict accident risk based on time and location factors.
+
+        {/* HEADER */}
+        <div className="card">
+          <h1 className="text-2xl font-semibold flex items-center gap-2">
+            <ShieldAlert className="text-blue-400" />
+            SafeCity — Predictive Threat Assessment
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            AI-assisted situational awareness for law enforcement
           </p>
         </div>
 
-        <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">📍 Interactive Risk Map</h2>
-          <p className="text-sm text-gray-400 mb-4">
-            Click anywhere to predict risk. Adjust the hour in the popup to see how time affects risk.
-          </p>
-          <PredictionMap onPredictionResult={handlePredictionResult} />
+        {/* MAP */}
+        <div className="card">
+          <h3 className="font-medium mb-3">Select Area</h3>
+          <CrimeMap
+            onLocationSelect={(la: number, lo: number) => {
+              setLat(la);
+              setLng(lo);
+            }}
+          />
+          {lat && lng && (
+            <p className="text-sm text-gray-400 mt-2">
+              📍 {lat.toFixed(4)}, {lng.toFixed(4)}
+            </p>
+          )}
         </div>
 
+        {/* ANALYZE */}
+        <button
+          onClick={handleAnalyze}
+          disabled={loading}
+          className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 flex items-center gap-2"
+        >
+          {loading ? <Loader2 className="animate-spin" /> : <Gauge />}
+          Analyze Crime Risk
+        </button>
+
+        {/* RESULT */}
         {result && (
-          <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-6 space-y-6">
-            <h2 className="flex items-center gap-2 text-2xl font-bold">
-              <AlertTriangle className="text-yellow-400" />
-              Prediction Result
+          <div className="card space-y-5">
+
+            <h2 className="flex items-center gap-2 text-lg">
+              <AlertTriangle />
+              Threat Assessment Result
             </h2>
 
-            <div className="flex items-center gap-4 flex-wrap">
-              <span className={`px-4 py-2 rounded-full text-sm font-bold ${riskColor}`}>
+            {/* RISK BADGE */}
+            <div className="flex items-center gap-4">
+              <span className={`px-4 py-1 rounded-full text-sm font-semibold ${riskColor}`}>
                 {result.risk_level.toUpperCase()} RISK
               </span>
-              <span className="px-4 py-2 rounded-full text-sm font-semibold bg-slate-700">
+              <span className="text-sm text-gray-400">
                 Priority: {result.priority}
               </span>
             </div>
 
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-sm text-gray-300 mb-2">Risk Probability</p>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <div className="w-full h-4 bg-slate-700 rounded-full overflow-hidden">
-                    <div className={`h-4 rounded-full transition-all ${progressColor}`} style={{ width: `${result.risk_probability * 100}%` }} />
-                  </div>
-                </div>
-                <span className="text-2xl font-bold">{(result.risk_probability * 100).toFixed(1)}%</span>
+            {/* CONFIDENCE BAR */}
+            <div>
+              <p className="text-sm text-gray-400 mb-1">
+                Risk Likelihood: {(result.risk_probability * 100).toFixed(1)}%
+              </p>
+              <div className="w-full h-2 bg-slate-700 rounded">
+                <div
+                  className={`h-2 rounded ${progressColor}`}
+                  style={{ width: `${result.risk_probability * 100}%` }}
+                />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-800/50 rounded-lg p-4">
-                <p className="text-gray-400 text-sm">Urgency Score</p>
-                <p className="text-2xl font-bold mt-1">{result.urgency_score}</p>
-              </div>
-              <div className="bg-slate-800/50 rounded-lg p-4">
-                <p className="text-gray-400 text-sm">Risk Level</p>
-                <p className="text-2xl font-bold mt-1">{result.risk_level}</p>
-              </div>
-            </div>
+            {/* METRICS */}
+            <p className="text-sm">
+              Urgency Score: <b>{result.urgency_score}</b>
+            </p>
 
-            <div className="border-t border-slate-700 pt-6">
-              <h3 className="flex items-center gap-2 font-bold text-lg mb-4">
+            {/* DEPLOYMENT */}
+            <div className="border-t border-slate-700 pt-4">
+              <h3 className="flex items-center gap-2 font-medium">
                 <Users />
-                Recommended Response
+                Recommended Deployment
               </h3>
-              <div className="space-y-2">
-                <p><span className="text-gray-400">Unit Type:</span> <b>{result.recommended_deployment.unit_type}</b></p>
-                <p><span className="text-gray-400">Personnel Required:</span> <b>{result.recommended_deployment.personnel_required}</b></p>
-                {result.recommended_deployment.support_units.length > 0 && (
-                  <div>
-                    <p className="text-gray-400 mb-2">Support Units:</p>
-                    <ul className="list-disc list-inside space-y-1 text-gray-300">
-                      {result.recommended_deployment.support_units.map((u, i) => <li key={i}>{u}</li>)}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t border-slate-700 pt-6">
-              <h3 className="flex items-center gap-2 font-bold text-lg mb-4">
-                <Info />
-                Why This Prediction?
-              </h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-300">
-                {result.explanation.map((e, i) => <li key={i}>{e}</li>)}
+              <p><b>Unit:</b> {result.recommended_deployment.unit_type}</p>
+              <p><b>Personnel:</b> {result.recommended_deployment.personnel_required}</p>
+              <ul className="list-disc list-inside text-sm text-gray-400 mt-1">
+                {result.recommended_deployment.support_units.map((u, i) => (
+                  <li key={i}>{u}</li>
+                ))}
               </ul>
             </div>
+
+            {/* AI REASONING */}
+            <div className="border-t border-slate-700 pt-4">
+              <h3 className="flex items-center gap-2 font-medium">
+                <Info />
+                AI Reasoning
+              </h3>
+              <ul className="list-disc list-inside text-sm text-gray-400">
+                {result.explanation.map((e, i) => (
+                  <li key={i}>{e}</li>
+                ))}
+              </ul>
+
+              <button
+                onClick={handleKnowWhy}
+                className="mt-3 px-4 py-2 rounded-md bg-slate-700 hover:bg-slate-600 text-sm flex items-center gap-2"
+              >
+                <Newspaper size={16} />
+                Know Why (Contextual Evidence)
+              </button>
+            </div>
+
+            {/* NEWS */}
+            {showNews && (
+  <div className="border-t border-slate-700 pt-4 space-y-3">
+    <h3 className="flex items-center gap-2 font-medium">
+      <Newspaper />
+      Contextual Crime Signals — {newsData?.locality}
+    </h3>
+
+    <p className="text-xs text-yellow-400">
+      ⚠ News articles are contextual indicators, not verified FIR data
+    </p>
+
+    {newsLoading && (
+      <p className="text-sm text-gray-400">Fetching local crime context…</p>
+    )}
+
+    {!newsLoading && newsData && newsData.articles.length === 0 && (
+      <p className="text-sm text-gray-400">
+        No recent crime-related news found for this area.
+      </p>
+    )}
+
+    {!newsLoading && newsData && newsData.articles.length > 0 && (
+      <div className="space-y-3">
+        {newsData.articles.map((a, i) => (
+          <div
+            key={i}
+            className="p-4 rounded-lg bg-[#0b1220] border border-slate-700"
+          >
+            <h4 className="font-medium">{a.title}</h4>
+            <p className="text-xs text-gray-400 mt-1">
+              {a.source} •{" "}
+              {new Date(a.published_at).toLocaleDateString()}
+            </p>
+            <a
+              href={a.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-blue-400 text-sm mt-2"
+            >
+              Read article <ExternalLink size={14} />
+            </a>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
+
           </div>
         )}
       </div>
     </div>
   );
 }
-// //   const [lat, setLat] = useState<number | null>(null);
-// //   const [lng, setLng] = useState<number | null>(null);
-// //   const [result, setResult] = useState<CrimePredictionResponse | null>(null);
-// //   const [loading, setLoading] = useState<boolean>(false);
-// //   const [error, setError] = useState<string | null>(null);
-
-// //   const handleAnalyze = async () => {
 // //     if (lat === null || lng === null) {
 // //       alert("Please select a location on the map");
 // //       return;

@@ -63,12 +63,6 @@ export default function FilteredHeatmapMap({ points }: HeatmapMapProps) {
                 Incidents: <span className="font-medium">{point.incidents}</span>
               </div>
               <div className="text-xs text-gray-600">
-                Confidence:{" "}
-                <span className="font-medium">
-                  {(point.avg_confidence * 100).toFixed(0)}%
-                </span>
-              </div>
-              <div className="text-xs text-gray-600">
                 Heat Index:{" "}
                 <span className="font-medium">
                   {(point.intensity * 100).toFixed(0)}%
