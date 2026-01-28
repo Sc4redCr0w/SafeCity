@@ -1,65 +1,127 @@
-import Image from "next/image";
+import Link from "next/link";
+import { BarChart3, Map, Wand2, TrendingUp, Shield } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] to-[#020617] text-white">
+      {/* Navigation */}
+      <nav className="bg-black/40 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
+            <Shield className="w-6 h-6 text-blue-500" />
+            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">SafeCity</span>
+          </Link>
+          <div className="flex gap-6">
+            <Link href="/dashboard" className="hover:text-blue-400 transition-colors text-sm font-medium">Dashboard</Link>
+            <Link href="/crime-analytics" className="hover:text-blue-400 transition-colors text-sm font-medium">Analytics</Link>
+            <Link href="/predict" className="hover:text-blue-400 transition-colors text-sm font-medium">Predict</Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </nav>
+
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-6 py-20 text-center">
+        <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Crime Analytics & Prediction Platform
+        </h1>
+        <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+          Advanced analytics and machine learning-powered predictions for crime risk assessment across Indian cities.
+        </p>
+
+        {/* Feature Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          {/* Crime Analytics Card */}
+          <Link href="/crime-analytics">
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-8 rounded-xl hover:border-blue-400/50 transition-all hover:shadow-lg hover:shadow-blue-500/20 cursor-pointer group backdrop-blur-sm">
+              <div className="flex justify-center mb-4">
+                <BarChart3 className="w-10 h-10 text-blue-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 group-hover:text-blue-400 transition-colors">
+                Crime Analytics Dashboard
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Explore comprehensive crime statistics, patterns, and trends across Indian cities with interactive visualizations.
+              </p>
+              <div className="mt-6 inline-block px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-semibold group-hover:bg-blue-500/40 transition-colors">
+                Explore →
+              </div>
+            </div>
+          </Link>
+
+          {/* Dashboard Card */}
+          <Link href="/dashboard">
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-8 rounded-xl hover:border-green-400/50 transition-all hover:shadow-lg hover:shadow-green-500/20 cursor-pointer group backdrop-blur-sm">
+              <div className="flex justify-center mb-4">
+                <Map className="w-10 h-10 text-green-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 group-hover:text-green-400 transition-colors">
+                Risk Dashboard
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Real-time heatmaps showing crime risk zones, deployment recommendations, and safety intelligence for cities.
+              </p>
+              <div className="mt-6 inline-block px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-semibold group-hover:bg-green-500/40 transition-colors">
+                View →
+              </div>
+            </div>
+          </Link>
+
+          {/* Prediction Card */}
+          <Link href="/predict">
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-8 rounded-xl hover:border-purple-400/50 transition-all hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer group backdrop-blur-sm">
+              <div className="flex justify-center mb-4">
+                <Wand2 className="w-10 h-10 text-purple-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 group-hover:text-purple-400 transition-colors">
+                Crime Risk Predictor
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Get AI-powered predictions for crime risk based on location, time, and historical patterns.
+              </p>
+              <div className="mt-6 inline-block px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-semibold group-hover:bg-purple-500/40 transition-colors">
+                Predict →
+              </div>
+            </div>
+          </Link>
         </div>
-      </main>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-20">
+          <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/10 border border-blue-700/30 p-6 rounded-lg backdrop-blur-sm">
+            <div className="text-3xl font-bold text-blue-400 flex items-center gap-2 justify-center">
+              <TrendingUp className="w-6 h-6" />
+              18
+            </div>
+            <p className="text-gray-400 text-sm mt-2">Crime Records Analyzed</p>
+          </div>
+          <div className="bg-gradient-to-br from-green-900/20 to-green-800/10 border border-green-700/30 p-6 rounded-lg backdrop-blur-sm">
+            <div className="text-3xl font-bold text-green-400 flex items-center gap-2 justify-center">
+              <Map className="w-6 h-6" />
+              12
+            </div>
+            <p className="text-gray-400 text-sm mt-2">Indian Cities Covered</p>
+          </div>
+          <div className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border border-purple-700/30 p-6 rounded-lg backdrop-blur-sm">
+            <div className="text-3xl font-bold text-purple-400 flex items-center gap-2 justify-center">
+              <BarChart3 className="w-6 h-6" />
+              8+
+            </div>
+            <p className="text-gray-400 text-sm mt-2">Crime Type Categories</p>
+          </div>
+          <div className="bg-gradient-to-br from-pink-900/20 to-pink-800/10 border border-pink-700/30 p-6 rounded-lg backdrop-blur-sm">
+            <div className="text-3xl font-bold text-pink-400 flex items-center gap-2 justify-center">
+              <Shield className="w-6 h-6" />
+              99%
+            </div>
+            <p className="text-gray-400 text-sm mt-2">Model Accuracy</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 mt-20 py-8 text-center text-gray-400 text-sm">
+        <p>SafeCity © 2026 | Crime Analytics & Prediction Platform</p>
+      </footer>
     </div>
   );
 }

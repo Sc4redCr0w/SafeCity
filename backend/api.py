@@ -971,6 +971,162 @@ def dashboard_summary():
         "heatmap_points": heatmap_points
     }
 
+# ===================================
+# CRIME ANALYTICS ENDPOINTS
+# ===================================
+
+@app.get("/api/crime/statistics")
+def get_crime_statistics():
+    """Get overall crime statistics from India dataset"""
+    import pandas as pd
+    
+    csv_path = os.path.join(os.path.dirname(__file__), "model", "indian_crimes_csv", "crime_dataset_india.csv")
+    
+    try:
+        df = pd.read_csv(csv_path)
+        
+        # Basic statistics
+        total_crimes = len(df)
+        unique_cities = df['City'].nunique() if 'City' in df.columns else 0
+        unique_crime_types = df['Crime Description'].nunique() if 'Crime Description' in df.columns else 0
+        
+        # Crime type distribution
+        crime_distribution = {}
+        if 'Crime Description' in df.columns:
+            crime_dist = df['Crime Description'].value_counts().to_dict()
+            crime_distribution = {str(k): int(v) for k, v in crime_dist.items()}
+        
+        # Top cities by crime count
+        top_cities = {}
+        if 'City' in df.columns:
+            city_counts = df['City'].value_counts().head(10).to_dict()
+            top_cities = {str(k): int(v) for k, v in city_counts.items()}
+        
+        return {
+            "total_crimes": total_crimes,
+            "unique_cities": unique_cities,
+            "unique_crime_types": unique_crime_types,
+            "crime_distribution": crime_distribution,
+            "top_cities": top_cities
+        }
+    except Exception as e:
+        return {"error": str(e), "total_crimes": 0}
+
+
+@app.get("/api/crime/by-city")
+def get_crimes_by_city(city: str = ""):
+    """Get crime statistics for a specific city"""
+    import pandas as pd
+    import numpy as np
+    import json
+    
+    csv_path = os.path.join(os.path.dirname(__file__), "model", "indian_crimes_csv", "crime_dataset_india.csv")
+    
+    try:
+        df = pd.read_csv(csv_path)
+        
+        if city and 'City' in df.columns:
+            city_data = df[df['City'].str.contains(city, case=False, na=False)]
+        else:
+            city_data = df
+        
+        crime_types = {}
+        if 'Crime Description' in city_data.columns:
+            crime_types = {str(k): int(v) for k, v in city_data['Crime Description'].value_counts().to_dict().items()}
+        
+        # Convert records to dict and handle NaN values
+        records = []
+        if len(city_data) > 0:
+            for _, row in city_data.head(20).iterrows():
+                record = {}
+                for col, val in row.items():
+                    if pd.isna(val):
+                        record[col] = None
+                    elif isinstance(val, (np.integer, np.floating)):
+                        if np.isnan(val) or np.isinf(val):
+                            record[col] = None
+                        else:
+                            record[col] = float(val) if isinstance(val, np.floating) else int(val)
+                    else:
+                        record[col] = str(val)
+                records.append(record)
+        
+        return {
+            "city": city,
+            "total_incidents": int(len(city_data)),
+            "crime_types": crime_types,
+            "records": records
+        }
+    except Exception as e:
+        return {"error": str(e), "city": city, "total_incidents": 0, "crime_types": {}, "records": []}
+
+
+@app.get("/api/crime/heatmap-data")
+def get_crime_heatmap():
+    """Get crime data for heatmap visualization"""
+    import pandas as pd
+    
+    csv_path = os.path.join(os.path.dirname(__file__), "model", "indian_crimes_csv", "crime_dataset_india.csv")
+    
+    try:
+        df = pd.read_csv(csv_path)
+        
+        # Generate heatmap points
+        heatmap_points = []
+        if 'City' in df.columns:
+            city_counts = df['City'].value_counts()
+            
+            # Approximate coordinates for major Indian cities
+            city_coords = {
+                'Mumbai': [19.0760, 72.8777],
+                'Delhi': [28.7041, 77.1025],
+                'Bangalore': [12.9716, 77.5946],
+                'Hyderabad': [17.3850, 78.4867],
+                'Chennai': [13.0827, 80.2707],
+                'Kolkata': [22.5726, 88.3639],
+                'Pune': [18.5204, 73.8567],
+                'Ahmedabad': [23.0225, 72.5714],
+                'Ludhiana': [30.9010, 75.8573],
+                'Surat': [21.1702, 72.8311],
+                'Visakhapatnam': [17.6869, 83.2185],
+                'Ghaziabad': [28.6692, 77.4538]
+            }
+            
+            for city, count in city_counts.items():
+                if city in city_coords:
+                    coords = city_coords[city]
+                    heatmap_points.append({
+                        "lat": coords[0],
+                        "lng": coords[1],
+                        "city": city,
+                        "intensity": min(count / max(city_counts.max(), 1) * 100, 100),
+                        "crime_count": int(count)
+                    })
+        
+        return {"heatmap_points": heatmap_points}
+    except Exception as e:
+        return {"error": str(e), "heatmap_points": []}
+
+
+@app.get("/api/crime/top-crimes")
+def get_top_crimes(limit: int = 10):
+    """Get top crimes by frequency"""
+    import pandas as pd
+    
+    csv_path = os.path.join(os.path.dirname(__file__), "model", "indian_crimes_csv", "crime_dataset_india.csv")
+    
+    try:
+        df = pd.read_csv(csv_path)
+        
+        if 'Crime Description' in df.columns:
+            top_crimes = df['Crime Description'].value_counts().head(limit).to_dict()
+            return {
+                "top_crimes": {str(k): int(v) for k, v in top_crimes.items()}
+            }
+        return {"top_crimes": {}}
+    except Exception as e:
+        return {"error": str(e), "top_crimes": {}}
+
 # Run the server
 if __name__ == "__main__":
     import uvicorn
