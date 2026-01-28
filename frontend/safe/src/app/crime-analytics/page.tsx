@@ -24,9 +24,9 @@ export default function CrimeAnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#020617] to-[#020617] text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] to-[#020617] text-white p-8 pt-24">
       {/* Header */}
-      <div className="mb-12">
+      <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <BarChart3 className="w-8 h-8 text-blue-500" />
           <h1 className="text-4xl font-semibold">Crime Analytics</h1>
@@ -36,18 +36,7 @@ export default function CrimeAnalyticsPage() {
         </p>
       </div>
 
-      {/* Statistics Cards */}
-      <section className="mb-12">
-        <CrimeStatsCard />
-      </section>
-
-      {/* Charts Grid */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        <TopCrimesChart />
-        <TopCitiesChart />
-      </section>
-
-      {/* City Search Section */}
+      {/* City Search Section - Moved to Top */}
       <section className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-8 rounded-xl backdrop-blur-sm mb-12">
         <div className="flex items-center gap-2 mb-6">
           <MapPin className="w-5 h-5 text-blue-500" />
@@ -90,6 +79,17 @@ export default function CrimeAnalyticsPage() {
             </p>
           </div>
         )}
+      </section>
+
+      {/* Statistics Cards */}
+      <section className="mb-12">
+        <CrimeStatsCard />
+      </section>
+
+      {/* Charts Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <TopCrimesChart />
+        <TopCitiesChart />
       </section>
 
       {/* Info Cards */}
