@@ -525,6 +525,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
+import pandas as pd
 import pickle
 import os
 import math
@@ -1218,6 +1219,219 @@ def predict_crime_types(city: str):
         }
     except Exception as e:
         return {"error": str(e), "city": city, "found": False}
+
+
+# ==================== FIR ENDPOINTS ====================
+
+@app.post("/api/fir/add")
+def add_fir(
+    date_reported: str,
+    date_of_occurrence: str,
+    time_of_occurrence: str,
+    city: str,
+    crime_code: str,
+    crime_description: str,
+    victim_age: int,
+    victim_gender: str,
+    weapon_used: str,
+    crime_domain: str,
+    police_deployed: str,
+    case_closed: str,
+    date_case_closed: str = None
+):
+    """Add a new FIR to the fir.csv file"""
+    try:
+        import os
+        from pathlib import Path
+        
+        fir_file = "fir.csv"
+        
+        # Read existing FIRs to generate next report number
+        try:
+            fir_df = pd.read_csv(fir_file)
+            next_report_num = len(fir_df) + 1
+        except:
+            next_report_num = 1
+        
+        # Create new FIR row
+        new_fir = {
+            "Report Number": next_report_num,
+            "Date Reported": date_reported,
+            "Date of Occurrence": date_of_occurrence,
+            "Time of Occurrence": time_of_occurrence,
+            "City": city,
+            "Crime Code": crime_code,
+            "Crime Description": crime_description,
+            "Victim Age": victim_age,
+            "Victim Gender": victim_gender,
+            "Weapon Used": weapon_used,
+            "Crime Domain": crime_domain,
+            "Police Deployed": police_deployed,
+            "Case Closed": case_closed,
+            "Date Case Closed": date_case_closed if case_closed.lower() == "yes" else "In Progress"
+        }
+        
+        # Read existing FIRs
+        if os.path.exists(fir_file) and os.path.getsize(fir_file) > 0:
+            fir_df = pd.read_csv(fir_file)
+        else:
+            fir_df = pd.DataFrame()
+        
+        # Add new FIR
+        fir_df = pd.concat([fir_df, pd.DataFrame([new_fir])], ignore_index=True)
+        
+        # Save to CSV
+        fir_df.to_csv(fir_file, index=False)
+        
+        return {
+            "success": True,
+            "message": "FIR added successfully",
+            "report_number": next_report_num
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+@app.get("/api/fir/search")
+def search_fir(query: str = "", search_type: str = "report_number"):
+    """Search FIRs by report number, city, or crime description"""
+    try:
+        fir_file = "fir.csv"
+        
+        if not os.path.exists(fir_file):
+            return {"found": False, "firs": []}
+        
+        fir_df = pd.read_csv(fir_file)
+        
+        if not query:
+            # Return all FIRs
+            firs = fir_df.to_dict(orient="records")
+        else:
+            if search_type == "report_number":
+                firs = fir_df[fir_df["Report Number"].astype(str).str.contains(query, case=False)].to_dict(orient="records")
+            elif search_type == "city":
+                firs = fir_df[fir_df["City"].str.contains(query, case=False)].to_dict(orient="records")
+            elif search_type == "crime_description":
+                firs = fir_df[fir_df["Crime Description"].str.contains(query, case=False)].to_dict(orient="records")
+            else:
+                firs = fir_df.to_dict(orient="records")
+        
+        # Convert NaN to None for JSON serialization
+        for fir in firs:
+            for key, value in fir.items():
+                if pd.isna(value):
+                    fir[key] = None
+        
+        return {
+            "found": len(firs) > 0,
+            "count": len(firs),
+            "firs": firs
+        }
+    except Exception as e:
+        return {"found": False, "error": str(e), "firs": []}
+
+
+@app.get("/api/fir/{report_number}")
+def get_fir(report_number: int):
+    """Get a specific FIR by report number"""
+    try:
+        fir_file = "fir.csv"
+        
+        if not os.path.exists(fir_file):
+            return {"found": False, "fir": None}
+        
+        fir_df = pd.read_csv(fir_file)
+        fir = fir_df[fir_df["Report Number"] == report_number].to_dict(orient="records")
+        
+        if not fir:
+            return {"found": False, "fir": None}
+        
+        fir_data = fir[0]
+        for key, value in fir_data.items():
+            if pd.isna(value):
+                fir_data[key] = None
+        
+        return {
+            "found": True,
+            "fir": fir_data
+        }
+    except Exception as e:
+        return {"found": False, "error": str(e), "fir": None}
+
+
+@app.put("/api/fir/{report_number}")
+def update_fir(
+    report_number: int,
+    date_reported: str = None,
+    date_of_occurrence: str = None,
+    time_of_occurrence: str = None,
+    city: str = None,
+    crime_code: str = None,
+    crime_description: str = None,
+    victim_age: int = None,
+    victim_gender: str = None,
+    weapon_used: str = None,
+    crime_domain: str = None,
+    police_deployed: str = None,
+    case_closed: str = None,
+    date_case_closed: str = None
+):
+    """Update an existing FIR"""
+    try:
+        fir_file = "fir.csv"
+        
+        if not os.path.exists(fir_file):
+            return {"success": False, "error": "FIR file not found"}
+        
+        fir_df = pd.read_csv(fir_file)
+        
+        # Find the FIR to update
+        fir_index = fir_df[fir_df["Report Number"] == report_number].index
+        
+        if len(fir_index) == 0:
+            return {"success": False, "error": "FIR not found"}
+        
+        idx = fir_index[0]
+        
+        # Update fields if provided
+        if date_reported:
+            fir_df.at[idx, "Date Reported"] = date_reported
+        if date_of_occurrence:
+            fir_df.at[idx, "Date of Occurrence"] = date_of_occurrence
+        if time_of_occurrence:
+            fir_df.at[idx, "Time of Occurrence"] = time_of_occurrence
+        if city:
+            fir_df.at[idx, "City"] = city
+        if crime_code:
+            fir_df.at[idx, "Crime Code"] = crime_code
+        if crime_description:
+            fir_df.at[idx, "Crime Description"] = crime_description
+        if victim_age:
+            fir_df.at[idx, "Victim Age"] = victim_age
+        if victim_gender:
+            fir_df.at[idx, "Victim Gender"] = victim_gender
+        if weapon_used:
+            fir_df.at[idx, "Weapon Used"] = weapon_used
+        if crime_domain:
+            fir_df.at[idx, "Crime Domain"] = crime_domain
+        if police_deployed:
+            fir_df.at[idx, "Police Deployed"] = police_deployed
+        if case_closed:
+            fir_df.at[idx, "Case Closed"] = case_closed
+            fir_df.at[idx, "Date Case Closed"] = date_case_closed if case_closed.lower() == "yes" else "In Progress"
+        
+        # Save to CSV
+        fir_df.to_csv(fir_file, index=False)
+        
+        return {
+            "success": True,
+            "message": "FIR updated successfully"
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 # Run the server

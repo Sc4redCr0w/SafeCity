@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Map, Wand2, TrendingUp, Shield, AlertTriangle } from "lucide-react";
+import { BarChart3, Map, Wand2, TrendingUp, Shield, AlertTriangle, FileText } from "lucide-react";
 
 export default function Home() {
   return (
@@ -15,6 +15,7 @@ export default function Home() {
             <Link href="/dashboard" className="hover:text-blue-400 transition-colors text-sm font-medium">Dashboard</Link>
             <Link href="/crime-analytics" className="hover:text-blue-400 transition-colors text-sm font-medium">Analytics</Link>
             <Link href="/crime-prediction" className="hover:text-blue-400 transition-colors text-sm font-medium">Prediction</Link>
+            <Link href="/fir" className="hover:text-blue-400 transition-colors text-sm font-medium">FIR</Link>
             <Link href="/predict" className="hover:text-blue-400 transition-colors text-sm font-medium">Predict</Link>
           </div>
         </div>
@@ -30,7 +31,7 @@ export default function Home() {
         </p>
 
         {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Crime Analytics Card */}
           <Link href="/crime-analytics">
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-8 rounded-xl hover:border-blue-400/50 transition-all hover:shadow-lg hover:shadow-blue-500/20 cursor-pointer group backdrop-blur-sm">
@@ -38,10 +39,10 @@ export default function Home() {
                 <BarChart3 className="w-10 h-10 text-blue-400 group-hover:scale-110 transition-transform" />
               </div>
               <h3 className="text-xl font-bold mb-3 group-hover:text-blue-400 transition-colors">
-                Crime Analytics Dashboard
+                Crime Analytics
               </h3>
               <p className="text-gray-300 text-sm">
-                Explore comprehensive crime statistics, patterns, and trends across Indian cities with interactive visualizations.
+                Explore comprehensive crime statistics and trends across Indian cities.
               </p>
               <div className="mt-6 inline-block px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-semibold group-hover:bg-blue-500/40 transition-colors">
                 Explore →
@@ -59,7 +60,7 @@ export default function Home() {
                 Risk Dashboard
               </h3>
               <p className="text-gray-300 text-sm">
-                Real-time heatmaps showing crime risk zones, deployment recommendations, and safety intelligence for cities.
+                Real-time heatmaps showing crime risk zones and safety intelligence.
               </p>
               <div className="mt-6 inline-block px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-semibold group-hover:bg-green-500/40 transition-colors">
                 View →
@@ -74,13 +75,31 @@ export default function Home() {
                 <AlertTriangle className="w-10 h-10 text-orange-400 group-hover:scale-110 transition-transform" />
               </div>
               <h3 className="text-xl font-bold mb-3 group-hover:text-orange-400 transition-colors">
-                Location Risk Predictor
+                Risk Predictor
               </h3>
               <p className="text-gray-300 text-sm">
-                Select a location on the map and get detailed crime risk predictions with breakdown by crime type.
+                Get crime risk predictions with breakdown by type on interactive maps.
               </p>
               <div className="mt-6 inline-block px-4 py-2 bg-orange-500/20 text-orange-400 rounded-lg text-sm font-semibold group-hover:bg-orange-500/40 transition-colors">
                 Analyze →
+              </div>
+            </div>
+          </Link>
+
+          {/* FIR Management Card */}
+          <Link href="/fir">
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 p-8 rounded-xl hover:border-purple-400/50 transition-all hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer group backdrop-blur-sm">
+              <div className="flex justify-center mb-4">
+                <FileText className="w-10 h-10 text-purple-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 group-hover:text-purple-400 transition-colors">
+                FIR Management
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Add, search, and manage First Information Reports with ease.
+              </p>
+              <div className="mt-6 inline-block px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-semibold group-hover:bg-purple-500/40 transition-colors">
+                Manage →
               </div>
             </div>
           </Link>
